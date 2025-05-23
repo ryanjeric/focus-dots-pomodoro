@@ -4,12 +4,12 @@ import { motion } from "framer-motion";
 interface TimerProps {
   onComplete?: () => void;
   initialMinutes?: number;
+  isRunning: boolean;
+  isPaused: boolean;
 }
 
-const Timer = ({ onComplete = () => {}, initialMinutes = 25 }: TimerProps) => {
+const Timer = ({ onComplete = () => {}, initialMinutes = 25, isRunning, isPaused }: TimerProps) => {
   const [timeLeft, setTimeLeft] = useState(initialMinutes * 60);
-  const [isRunning, setIsRunning] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
 
   const formatTime = useCallback((seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -17,24 +17,7 @@ const Timer = ({ onComplete = () => {}, initialMinutes = 25 }: TimerProps) => {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   }, []);
 
-  const toggleTimer = useCallback(() => {
-    if (!isRunning && !isPaused) {
-      // Start timer
-      setIsRunning(true);
-    } else if (isRunning) {
-      // Pause timer
-      setIsRunning(false);
-      setIsPaused(true);
-    } else if (isPaused) {
-      // Resume timer
-      setIsRunning(true);
-      setIsPaused(false);
-    }
-  }, [isRunning, isPaused]);
-
   const resetTimer = useCallback(() => {
-    setIsRunning(false);
-    setIsPaused(false);
     setTimeLeft(initialMinutes * 60);
   }, [initialMinutes]);
 
@@ -46,7 +29,6 @@ const Timer = ({ onComplete = () => {}, initialMinutes = 25 }: TimerProps) => {
         setTimeLeft((prevTime) => {
           if (prevTime <= 1) {
             clearInterval(interval);
-            setIsRunning(false);
             onComplete();
             return initialMinutes * 60;
           }
@@ -87,14 +69,6 @@ const Timer = ({ onComplete = () => {}, initialMinutes = 25 }: TimerProps) => {
           {formatTime(timeLeft)}
         </span>
       </motion.div>
-
-      <div className="mt-4 text-sm text-muted-foreground text-center">
-        {isRunning
-          ? "Focus session in progress"
-          : isPaused
-            ? "Session paused"
-            : "Tap circle to start"}
-      </div>
     </div>
   );
 };
